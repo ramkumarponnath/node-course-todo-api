@@ -8,6 +8,8 @@ let bodyParser = require('body-parser');
 let app = express();
 app.use(bodyParser.json());
 
+const PORT = process.env.port || 3000;
+
 app.post('/todos', (req,res) => {
     let todo = new Todo({
         text: req.body.text
@@ -41,6 +43,21 @@ app.get('/todos/:id', (req,res) => {
         }).catch(e => res.status(400).send(e));
 });
 
+app.delete('/todos/:id', (req,res) => {
+    const id = req.params.id;
+    if(!ObjectID.isValid(id)){
+        res.status(400).send('Invalid ID');
+        return;
+    }
+    Todo.findByIdAndDelete(req.params.id).then((todo) => {
+        if(!todo){
+            res.status(404).send('Todo not found');
+            return;
+        }
+        res.send({todo})
+    }).catch(e => res.status(400).send(e));
+});
+
 app.post('/users', (req,res) => {
     let user = new User({
         text: req.body.text
@@ -58,8 +75,8 @@ app.get('/users', (req,res) => {
     }).catch(e => res.status(400).send(e));
 });
 
-app.listen(3000, () => {
-    console.log('Server started and listening on port 3000')
+app.listen(PORT, () => {
+    console.log('Server started and listening on port '+PORT);
 });
 
 module.exports = {app};

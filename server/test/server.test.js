@@ -12,9 +12,6 @@ const todos = [{
     text: 'Second test todo'
 }];
 
-// beforeEach((done) => {
-//     Todo.deleteMany({}).then(() => done());
-// });
 beforeEach((done) => {
     Todo.deleteMany({}).then(() => {
       return Todo.insertMany(todos);
