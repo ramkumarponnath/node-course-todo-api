@@ -4,6 +4,7 @@ const {User} = require('./models/User');
 const {ObjectID} = require('mongodb')
 let express = require('express');
 let bodyParser = require('body-parser');
+const _ = require('lodash');
 
 let app = express();
 app.use(bodyParser.json());
@@ -58,6 +59,29 @@ app.delete('/todos/:id', (req,res) => {
     }).catch(e => res.status(400).send(e));
 });
 
+app.patch('/todos/:id', (req,res) => {
+    let id = req.params.id;
+    let body = _.pick(req.body,['text','completed']);
+    if(!ObjectID.isValid(id)){
+        res.status(400).send('Invalid ID');
+        return;
+    }
+    if(_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    }
+    Todo.findByIdAndUpdate(id,{$set:body}, {new:true}).then((todo) => {
+        if(!todo) {
+            return res.status(404).send();
+        }
+        return res.send({todo});
+    }).catch((err) => {
+        res.status(400).send(err);
+    });
+});
+
 app.post('/users', (req,res) => {
     let user = new User({
         text: req.body.text
@@ -74,6 +98,7 @@ app.get('/users', (req,res) => {
         res.send({users});
     }).catch(e => res.status(400).send(e));
 });
+
 
 app.listen(PORT, () => {
     console.log('Server started and listening on port '+PORT);
