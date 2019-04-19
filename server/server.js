@@ -1,11 +1,12 @@
 require('./config/config');
-const {mongoose} = require('./db/mongoose');
-const {Todo} = require('./models/Todo');
-const {User} = require('./models/User');
+let {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+var {User} = require('./models/user');
 const {ObjectID} = require('mongodb')
-let express = require('express');
-let bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 const _ = require('lodash');
+var {authenticate} = require('./middleware/authenticate');
 
 let app = express();
 app.use(bodyParser.json());
@@ -97,10 +98,8 @@ app.post('/users', (req,res) => {
     })
 });
 
-app.get('/users', (req,res) => {
-    User.find().then(users => {
-        res.send({users});
-    }).catch(e => res.status(400).send(e));
+app.get('/users/me', authenticate, (req,res) => {
+    res.send(req.user);
 });
 
 app.listen(PORT, () => {
