@@ -111,6 +111,14 @@ app.post('/users/login', (req,res) => {
     }).catch(e => res.status(400).send(e));
 });
 
+app.delete('/users/me/token', authenticate, (req,res) => {
+    req.user.removeToken(req.token).then((user) => {
+        res.status(200).send(user);
+    }).catch(err => {
+        res.status(400).send(err);
+    })
+});
+
 app.listen(PORT, () => {
     console.log('Server started and listening on port '+PORT);
 });
